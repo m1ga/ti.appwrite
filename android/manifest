@@ -1,0 +1,18 @@
+#
+# this is your module manifest and used by Titanium
+# during compilation, packaging, distribution, etc.
+#
+version: 1.0.0
+apiversion: 4
+architectures: arm64-v8a armeabi-v7a x86 x86_64
+description: ti.appwrite
+author: Michael Gangolf
+license: MIT
+copyright: Copyright (c) 2021 by Michael Gangolf
+
+# these should not be edited
+name: ti.appwrite
+moduleid: ti.appwrite
+guid: f45cb96d-2d71-44a4-ba49-4cf868315734
+platform: android
+minsdk: 9.0.0.GA
