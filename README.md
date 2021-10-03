@@ -1,5 +1,7 @@
 # Appcelerator Titanium module for Appwrite
 
+<img src="images/screenshot.png" alt="screenshot"/>
+
 Appcelerator Titanium Android module using [Appwrite's Android SDK](https://github.com/appwrite/sdk-for-android)
 
 ## What is Appwrite:
@@ -36,19 +38,67 @@ Start the docker machine and create a new project. Make sure to add an `Android 
 var appwrite = require("ti.appwrite");
 appwrite.create();
 
+appwrite.create({
+	endpoint: "http://localhost/v1",
+	project: "PROJECT_ID",
+	selfSigned: true,
+	channels: ["files", "account"]
+});
 
-appwrite.endpoint = "http://localhost/v1";
-appwrite.project = "PROJECT_ID"
-appwrite.selfSigned = true;
+// appwrite.endpoint = "http://localhost/v1";
+// appwrite.project = "PROJECT_ID"
+// appwrite.selfSigned = true;
+
+appwrite.addEventListener("realtimeEvent", function(e) {
+	console.log("event: " + e.type);
+})
+
+appwrite.addEventListener("error", function(e) {
+	console.error("error: " + e.action);
+})
+
+appwrite.addEventListener("account", function(e) {
+	console.log("---account---");
+	console.log("Action:", e.action);
+	console.log(e);
+	console.log("");
+})
+
+appwrite.addEventListener("documents", function(e) {
+	console.log("---documents---");
+	console.log("data: " + e.data);
+	console.log("");
+})
+
 
 appwrite.createAccount({
 	email: "test@test.com",
 	password: "password"
 });
 
+appwrite.login({
+	email: "test@test.de",
+	password: "password"
+});
+
+appwrite.getAccount();
+
 $.index.open();
 ```
 
+## Methods
+
+* create()
+* createAccount()
+* login()
+* getAccount()
+* getDocuments()
+
+## Events
+* account
+* error
+* realtimeEvent
+* documents
 
 ## Author
 
