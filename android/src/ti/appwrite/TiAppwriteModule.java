@@ -10,6 +10,7 @@ package ti.appwrite;
 
 import androidx.annotation.NonNull;
 
+import org.appcelerator.kroll.KrollDict;
 import org.appcelerator.kroll.KrollModule;
 import org.appcelerator.kroll.annotations.Kroll;
 
@@ -17,6 +18,7 @@ import org.appcelerator.titanium.TiApplication;
 import org.appcelerator.kroll.common.Log;
 import org.appcelerator.kroll.common.TiConfig;
 import org.appcelerator.titanium.util.TiConvert;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 
 import java.util.HashMap;
@@ -24,6 +26,8 @@ import java.util.HashMap;
 import io.appwrite.Client;
 import io.appwrite.exceptions.AppwriteException;
 import io.appwrite.services.Account;
+import io.appwrite.services.Database;
+import io.appwrite.services.Realtime;
 import kotlin.Result;
 import kotlin.coroutines.Continuation;
 import kotlin.coroutines.CoroutineContext;
@@ -54,10 +58,181 @@ public class TiAppwriteModule extends KrollModule
 
 	// Methods
 	@Kroll.method
-	public void create()
+	public void create(HashMap map)
 	{
 		client = new Client(TiApplication.getAppCurrentActivity());
+		String _endpoint = TiConvert.toString(map.get("endpoint"), "");
+		String _project = TiConvert.toString(map.get("project"), "");
+		Object[] _channels = map.containsKey("channels")? (Object[]) map.get("channels") :null;
+		isSelfSigned = TiConvert.toBoolean(map.get("selfSigned"), false);
+
+		if (_endpoint != "" && _project != "") {
+			endpoint(_endpoint);
+			project(_project);
+			selfSigned(isSelfSigned);
+
+			if (_channels != null) {
+				subscribe(_channels);
+			}
+		}
+
+
 	}
+
+	@Kroll.method
+	public void subscribe(Object[] data)
+	{
+		Realtime realtime = new Realtime(client);
+		String[] channels = new String[data.length];
+		System.arraycopy(data, 0, channels, 0, data.length);
+
+		realtime.subscribe(channels, response -> {
+			KrollDict kd = new KrollDict();
+			kd.put("action", response.getEvent());
+			fireEvent("realtimeEvent", kd);
+			return null;
+		});
+	}
+	@Kroll.method
+	public void getDocuments(String collectionId)
+	{
+		if (collectionId != "") {
+			Database database = new Database(client);
+			try {
+				database.listDocuments(collectionId, new Continuation<Object>() {
+					@NotNull
+					@Override
+					public CoroutineContext getContext() {
+						return EmptyCoroutineContext.INSTANCE;
+					}
+
+					@Override
+					public void resumeWith(@NotNull Object o) {
+						try {
+							if (o instanceof Result.Failure) {
+								Result.Failure failure = (Result.Failure) o;
+								throw failure.exception;
+							} else {
+								Response response = (Response) o;
+								JSONObject json = new JSONObject(response.body().string());
+								KrollDict kd = new KrollDict();
+								kd.put("data", json.has("documents")?json.get("documents").toString():"{}");
+								fireEvent("documents", kd);
+							}
+						} catch (Throwable th) {
+							Log.e("ERROR", th.toString());
+						}
+					}
+				});
+			} catch (Exception e) {
+				//
+			}
+		}
+	}
+
+	@Kroll.method
+	public void login(HashMap map)
+	{
+		String email = TiConvert.toString(map.get("email"), "");
+		String password = TiConvert.toString(map.get("password"), "");
+
+		if (email != "" && password != "") {
+			Account account = new Account(client);
+			try {
+				account.createSession(email, password, new Continuation<Object>() {
+					@NotNull
+					@Override
+					public CoroutineContext getContext() {
+						return EmptyCoroutineContext.INSTANCE;
+					}
+
+					@Override
+					public void resumeWith(@NotNull Object o) {
+
+						try {
+							if (o instanceof Result.Failure) {
+								Result.Failure failure = (Result.Failure) o;
+								throw failure.exception;
+							} else {
+								Response response = (Response) o;
+								JSONObject json = new JSONObject(response.body().string());
+
+								KrollDict kd = getUserData("login", json);
+								fireEvent("account", kd);
+							}
+						} catch (Throwable th) {
+							KrollDict kd = new KrollDict();
+							kd.put("action", "login");
+							fireEvent("error", kd);
+							Log.e("ERROR", th.toString());
+						}
+					}
+				});
+			} catch (AppwriteException e) {
+				Log.e(LCAT, "Login error: " + e.getMessage());
+			}
+		}
+	}
+
+	@Kroll.method
+	public void getAccount()
+	{
+		Account account = new Account(client);
+		try {
+			account.get(new Continuation<Object>() {
+				@NotNull
+				@Override
+				public CoroutineContext getContext() {
+					return EmptyCoroutineContext.INSTANCE;
+				}
+
+				@Override
+				public void resumeWith(@NotNull Object o) {
+
+					try {
+						if (o instanceof Result.Failure) {
+							Result.Failure failure = (Result.Failure) o;
+							throw failure.exception;
+						} else {
+							Response response = (Response) o;
+							JSONObject json = new JSONObject(response.body().string());
+							KrollDict kd = getUserData("getAccount", json);
+							fireEvent("account", kd);
+						}
+					} catch (Throwable th) {
+						KrollDict kd = new KrollDict();
+						kd.put("action", "getAccount");
+						fireEvent("error", kd);
+						Log.e("ERROR", th.toString());
+					}
+				}
+			});
+		} catch (AppwriteException e) {
+			Log.e(LCAT, "Get account error: " + e.getMessage());
+		}
+	}
+
+	private KrollDict getUserData(String action, JSONObject json){
+		KrollDict kd = new KrollDict();
+		kd.put("action", action);
+
+		if (json != null) {
+			try {
+				kd.put("id", json.has("$id") ? json.get("$id") : "");
+				kd.put("name", json.has("name") ? json.get("name") : "");
+				kd.put("registration", json.has("registration") ? json.get("registration") : "");
+				kd.put("status", json.has("status") ? json.get("status") : "");
+				kd.put("passwordUpdate", json.has("passwordUpdate") ? json.get("passwordUpdate") : "");
+				kd.put("email", json.has("email") ? json.get("email") : "");
+				kd.put("emailVerification", json.has("emailVerification") ? json.get("emailVerification") : "");
+				kd.put("prefs", json.has("prefs") ? json.get("prefs").toString() : "");
+			} catch (Exception e) {
+				//
+			}
+		}
+		return kd;
+	}
+
 
 	@Kroll.method
 	public void createAccount(HashMap map)
@@ -77,23 +252,29 @@ public class TiAppwriteModule extends KrollModule
 
 					@Override
 					public void resumeWith(@NonNull Object o) {
-						String json = "";
 						try {
 							if (o instanceof Result.Failure) {
 								Result.Failure failure = (Result.Failure) o;
 								throw failure.exception;
 							} else {
 								Response response = (Response) o;
-								json = response.body().string();
-								json = new JSONObject(json).toString(8);
-								Log.d("RESPONSE", json);
+								JSONObject json = new JSONObject(response.body().string());
+
+								KrollDict kd = getUserData("createAccount", json);
+								fireEvent("account", kd);
 							}
 						} catch (Throwable th) {
+							KrollDict kd = new KrollDict();
+							kd.put("action", "createAccount");
+							fireEvent("error", kd);
 							Log.e("ERROR", th.toString());
 						}
 					}
 				});
 			} catch (AppwriteException e) {
+				KrollDict kd = new KrollDict();
+				kd.put("action", "createAccount");
+				fireEvent("error", kd);
 				Log.e(LCAT, "Error creating account: " + e.getMessage());
 			}
 		}
