@@ -90,6 +90,7 @@ $.index.open();
 
 * create()
 * createAccount()
+* deleteAccount();
 * login()
 * getAccount()
 * getDocuments()
