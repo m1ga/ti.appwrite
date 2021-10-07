@@ -93,6 +93,8 @@ $.index.open();
 * login()
 * getAccount()
 * getDocuments()
+* subscribe([])
+* unsubscribe([])
 
 ## Events
 * account

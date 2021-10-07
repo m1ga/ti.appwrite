@@ -25,6 +25,7 @@ import java.util.HashMap;
 
 import io.appwrite.Client;
 import io.appwrite.exceptions.AppwriteException;
+import io.appwrite.models.RealtimeSubscription;
 import io.appwrite.services.Account;
 import io.appwrite.services.Database;
 import io.appwrite.services.Realtime;
@@ -52,9 +53,7 @@ public class TiAppwriteModule extends KrollModule
 	}
 
 	@Kroll.onAppCreate
-	public static void onAppCreate(TiApplication app)
-	{
-	}
+	public static void onAppCreate(TiApplication app)	{}
 
 	// Methods
 	@Kroll.method
@@ -72,15 +71,14 @@ public class TiAppwriteModule extends KrollModule
 			selfSigned(isSelfSigned);
 
 			if (_channels != null) {
-				subscribe(_channels);
+				subscribeChannels(_channels);
 			}
 		}
 
 
 	}
 
-	@Kroll.method
-	public void subscribe(Object[] data)
+	private void subscribeChannels(Object[] data)
 	{
 		Realtime realtime = new Realtime(client);
 		String[] channels = new String[data.length];
@@ -93,6 +91,29 @@ public class TiAppwriteModule extends KrollModule
 			return null;
 		});
 	}
+
+	@Kroll.method
+	public void subscribe(Object map)
+	{
+		if (map != null) {
+			subscribeChannels((Object[]) map);
+		}
+	}
+
+	@Kroll.method
+	public void unsubscribe(Object _input)
+	{
+		Object[] data = (Object[]) _input;
+		Realtime realtime = new Realtime(client);
+		String[] channels = new String[data.length];
+		System.arraycopy(data, 0, channels, 0, data.length);
+
+		RealtimeSubscription sub = realtime.subscribe(channels, response -> {
+			return null;
+		});
+		sub.close();
+	}
+
 	@Kroll.method
 	public void getDocuments(String collectionId)
 	{
