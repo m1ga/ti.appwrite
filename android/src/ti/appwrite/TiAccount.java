@@ -62,13 +62,12 @@ public class TiAccount {
                             proxy.fireEvent("account", kd);
                         }
                     } catch (Throwable th) {
-                        th.printStackTrace();
-                        reportError("create account");
+                        reportError("create account", (AppwriteException)th);
                     }
                 }
             });
         } catch (AppwriteException e) {
-            reportError("create account", e.getCode() + "\n" + e.getResponse() + "\n" + e.getMessage());
+            reportError("create account", e);
         }
     }
 
@@ -105,12 +104,12 @@ public class TiAccount {
                                 proxy.fireEvent("account", kd);
                             }
                         } catch (Throwable th) {
-                            reportError("login");
+                            reportError("login", (AppwriteException)th);
                         }
                     }
                 });
             } catch (AppwriteException e) {
-                reportError("login", e.getCode() + "\n" + e.getResponse() + "\n" + e.getMessage());
+                reportError("login", e);
             }
         }
     }
@@ -143,13 +142,13 @@ public class TiAccount {
                                     //proxy.fireEvent("account", kd);
                                 }
                             } catch (Throwable th) {
-                                Log.e("ERROR", th.toString());
+                                reportError("verify mail" , (AppwriteException)th);
                             }
                         }
                     }
             );
         } catch (AppwriteException e) {
-            reportError("verify mail", e.getCode() + "\n" + e.getResponse() + "\n" + e.getMessage());
+            reportError("verify mail", e);
         }
 
     }
@@ -180,12 +179,12 @@ public class TiAccount {
                             proxy.fireEvent("account", kd);
                         }
                     } catch (Throwable th) {
-                        reportError("get account", th.toString());
+                        reportError("get account", (AppwriteException)th);
                     }
                 }
             });
         } catch (AppwriteException e) {
-            reportError("get account", e.getCode() + "\n" + e.getResponse() + "\n" + e.getMessage());
+            reportError("get account", e);
         }
     }
 
@@ -214,18 +213,22 @@ public class TiAccount {
                         }
                     } catch (Throwable th) {
                         th.printStackTrace();
-                        reportError("delete account", ((AppwriteException)th).getMessage());
+                        reportError("delete account", (AppwriteException)th);
                     }
                 }
             });
         } catch (AppwriteException e) {
-            reportError("delete account", e.getCode() + "\n" + e.getResponse() + "\n" + e.getMessage());
+            reportError("delete account", e);
         }
     }
 
-    private void reportError(String action, String message) {
-        Log.e(LCAT, "error: " + message);
-        reportError(action);
+    private void reportError(String action, AppwriteException ex) {
+      KrollDict kd = new KrollDict();
+      kd.put("action", action);
+      kd.put("message", ex.getMessage());
+      kd.put("code", ex.getCode());
+      kd.put("response", ex.getResponse());
+      proxy.fireEvent("error", kd);
     }
 
     private void reportError(String action) {

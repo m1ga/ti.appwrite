@@ -99,7 +99,7 @@ $.index.open();
 
 ## Events
 * account
-* error
+* error: action, message, code, response
 * realtimeEvent
 * documents
 
