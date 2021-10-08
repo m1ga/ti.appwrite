@@ -36,25 +36,73 @@ Start the docker machine and create a new project. Make sure to add an `Android 
 
 ```js
 var appwrite = require("ti.appwrite");
-appwrite.create();
+var SERVER_URL = "http://192.168.0.10/v1"
+var PROJECT_ID = "12345";
+var DATABASE_ID = "12345";
 
-appwrite.create({
-	endpoint: "http://localhost/v1",
-	project: "PROJECT_ID",
-	selfSigned: true,
-	channels: ["files", "account"]
+var btns = [
+	["connect", onClickConnect],
+	["create account", onClickCreate],
+	["verify mail", onClickVerify],
+	["delete account", onClickDelete],
+	["login", onClickLogin],
+	["get account", onClickGetAccount],
+	["get documents", onClickGetDocuments],
+	["subscribe", onClickSub],
+	["unsubscribe", onClickUnsub],
+	["create file", onClickCreateFile],
+	["list file", onClickListFiles]
+];
+
+var win = Ti.UI.createWindow({
+	backgroundColor: '#fff',
+	layout: 'vertical'
 });
+var log = Ti.UI.createTextArea({
+	width: Ti.UI.FILL,
+	height: 100,
+	borderColor: 'red',
+	borderWidth: 1,
+	color: "#fff",
+	backgroundColor: "#333",
+	font: {
+		fontSize: 14
+	}
+});
+win.add(log);
 
-// appwrite.endpoint = "http://localhost/v1";
-// appwrite.project = "PROJECT_ID"
-// appwrite.selfSigned = true;
+var btnArray = [];
+
+_.each(btns, function(btn) {
+	var button = Ti.UI.createButton({
+		title: btn[0],
+		width: 200
+	});
+	button.addEventListener("click", btn[1]);
+	btnArray.push(button);
+})
+win.add(btnArray);
+btnArray[0].backgroundColor = "#f44";
 
 appwrite.addEventListener("realtimeEvent", function(e) {
-	console.log("event: " + e.type);
+	console.log("event: " + e.action);
 })
 
 appwrite.addEventListener("error", function(e) {
 	console.error("error: " + e.action);
+	console.error(e);
+	log.value += e.action + " " + e.message + "\n";
+})
+
+appwrite.addEventListener("documents", function(e) {
+	console.log("---documents---");
+	console.log("data: " + e.data);
+	console.log("");
+})
+appwrite.addEventListener("storage", function(e) {
+	console.log("---storage---");
+	console.log("data: " + e.data);
+	console.log("");
 })
 
 appwrite.addEventListener("account", function(e) {
@@ -63,27 +111,88 @@ appwrite.addEventListener("account", function(e) {
 	console.log(e);
 	console.log("");
 })
-
-appwrite.addEventListener("documents", function(e) {
-	console.log("---documents---");
-	console.log("data: " + e.data);
-	console.log("");
+appwrite.addEventListener("connected", function(e) {
+	btnArray[0].backgroundColor = "#4f4";
 })
 
+function onClickSub(e) {
+	appwrite.subscribe(["files", "account"]);
+}
 
-appwrite.createAccount({
-	email: "test@test.com",
-	password: "password"
-});
 
-appwrite.login({
-	email: "test@test.de",
-	password: "password"
-});
+function onClickLogin(e) {
+	appwrite.login({
+		email: "mail@mail.com",
+		password: "password"
+	});
 
-appwrite.getAccount();
+}
 
-$.index.open();
+function onClickCreate(e) {
+	appwrite.createAccount({
+		email: "mail@mail.com",
+		password: "password"
+	});
+
+}
+
+function onClickDelete(e) {
+	appwrite.deleteAccount();
+}
+
+function onClickUnsub(e) {
+	appwrite.unsubscribe(["files", "account"]);
+}
+
+function onClickConnect(e) {
+	appwrite.create({
+		endpoint: SERVER_URL,
+		project: PROJECT_ID,
+		selfSigned: true,
+		channels: ["files", "account"]
+	});
+
+	// appwrite.endpoint = SERVER_URL;
+	// appwrite.project = PROJECT_ID;
+	// appwrite.selfSigned = true;
+}
+
+function onClickGetDocuments(e) {
+	appwrite.getDocuments(DATABASE_ID);
+}
+
+function onClickGetAccount(e) {
+	appwrite.getAccount();
+}
+
+function onClickVerify(e) {
+	appwrite.verifyMail(SERVER_URL);
+}
+
+
+function onClickCreateFile(e) {
+	var file = Ti.Filesystem.getFile(Ti.Filesystem.externalStorageDirectory, "appicon.png");
+
+	if (!file.exists()) {
+		// copy it from /assets/ to the external storage
+		var source = Ti.Filesystem.getFile(Ti.Filesystem.resourcesDirectory, "appicon.png");
+		file.write(source.read());
+	}
+
+	if (file.exists()) {
+		appwrite.createFile({
+			file: file,
+			read: ["*"],
+			write: ["*"]
+		});
+	}
+}
+
+function onClickListFiles(e) {
+	appwrite.listFiles();
+}
+
+win.open();
 ```
 
 ## Methods
