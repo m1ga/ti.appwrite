@@ -96,12 +96,16 @@ $.index.open();
 * getDocuments()
 * subscribe([])
 * unsubscribe([])
+* createFile({file, read[], write[]})
+* listFiles();
 
 ## Events
 * account
 * error: action, message, code, response
 * realtimeEvent
 * documents
+* storage
+* connected
 
 ## Author
 

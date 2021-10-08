@@ -61,13 +61,14 @@ public class TiAccount {
                             KrollDict kd = TiAppwriteModule.getUserData("createAccount", json);
                             proxy.fireEvent("account", kd);
                         }
+                    } catch (AppwriteException e) {
+                        ErrorClass.reportError("create account", e, proxy);
                     } catch (Throwable th) {
-                        reportError("create account", (AppwriteException)th);
                     }
                 }
             });
         } catch (AppwriteException e) {
-            reportError("create account", e);
+            ErrorClass.reportError("create account", e, proxy);
         }
     }
 
@@ -103,13 +104,14 @@ public class TiAccount {
                                 KrollDict kd = TiAppwriteModule.getUserData("login", json);
                                 proxy.fireEvent("account", kd);
                             }
+                        } catch (AppwriteException e) {
+                            ErrorClass.reportError("login", e, proxy);
                         } catch (Throwable th) {
-                            reportError("login", (AppwriteException)th);
                         }
                     }
                 });
             } catch (AppwriteException e) {
-                reportError("login", e);
+                ErrorClass.reportError("login", e, proxy);
             }
         }
     }
@@ -141,14 +143,15 @@ public class TiAccount {
                                     //KrollDict kd = TiAppwriteModule.getUserData("login", json);
                                     //proxy.fireEvent("account", kd);
                                 }
+                            } catch (AppwriteException e) {
+                                ErrorClass.reportError("verify mail", e, proxy);
                             } catch (Throwable th) {
-                                reportError("verify mail" , (AppwriteException)th);
                             }
                         }
                     }
             );
         } catch (AppwriteException e) {
-            reportError("verify mail", e);
+            ErrorClass.reportError("verify mail", e, proxy);
         }
 
     }
@@ -178,13 +181,14 @@ public class TiAccount {
                             KrollDict kd = TiAppwriteModule.getUserData("getAccount", json);
                             proxy.fireEvent("account", kd);
                         }
+                    } catch (AppwriteException e) {
+                        ErrorClass.reportError("get account", e, proxy);
                     } catch (Throwable th) {
-                        reportError("get account", (AppwriteException)th);
                     }
                 }
             });
         } catch (AppwriteException e) {
-            reportError("get account", e);
+            ErrorClass.reportError("get account", e, proxy);
         }
     }
 
@@ -211,24 +215,15 @@ public class TiAccount {
                             kd.put("deleteAccount", true);
                             proxy.fireEvent("account", kd);
                         }
-                    } catch (Throwable th) {
-                        th.printStackTrace();
-                        reportError("delete account", (AppwriteException)th);
+                    } catch (AppwriteException e) {
+                        ErrorClass.reportError("delete account", e, proxy);
+                    } catch (Throwable throwable) {
                     }
                 }
             });
         } catch (AppwriteException e) {
-            reportError("delete account", e);
+            ErrorClass.reportError("delete account", e, proxy);
         }
-    }
-
-    private void reportError(String action, AppwriteException ex) {
-      KrollDict kd = new KrollDict();
-      kd.put("action", action);
-      kd.put("message", ex.getMessage());
-      kd.put("code", ex.getCode());
-      kd.put("response", ex.getResponse());
-      proxy.fireEvent("error", kd);
     }
 
     private void reportError(String action) {
