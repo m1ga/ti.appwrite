@@ -144,7 +144,16 @@ public class TiAppwriteModule extends KrollModule {
     @Kroll.method
     public void getDocuments(String collectionId) {
         if (!checkConnection()) return;
-        database.getDocuments(collectionId);
+        if (collectionId != "") {
+            database.getDocuments(collectionId);
+        }
+    }
+    @Kroll.method
+    public void getDocument(String collectionId, String documentId) {
+        if (!checkConnection()) return;
+        if (collectionId != "" && documentId != "") {
+            database.getDocument(collectionId, documentId);
+        }
     }
 
     @Kroll.method

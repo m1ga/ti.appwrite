@@ -4,7 +4,10 @@ import org.appcelerator.kroll.KrollDict;
 import org.appcelerator.kroll.KrollProxy;
 import org.appcelerator.kroll.common.Log;
 import org.jetbrains.annotations.NotNull;
+import org.json.JSONArray;
 import org.json.JSONObject;
+
+import java.util.Iterator;
 
 import io.appwrite.Client;
 import io.appwrite.exceptions.AppwriteException;
@@ -27,7 +30,10 @@ public class TiDatabase {
         database = new Database(client);
         proxy = _proxy;
     }
+
     public void getDocuments(String collectionId) {
+        String _action = "get documents";
+
         if (collectionId != "") {
             Database database = new Database(client);
             try {
@@ -47,12 +53,21 @@ public class TiDatabase {
                             } else {
                                 Response response = (Response) o;
                                 JSONObject json = new JSONObject(response.body().string());
+
                                 KrollDict kd = new KrollDict();
-                                kd.put("data", json.has("documents") ? json.get("documents").toString() : "{}");
-                                proxy.fireEvent("documents", kd);
+                                JSONArray files = new JSONArray(json.get("documents").toString());
+                                Object[] kdFiles = new Object[files.length()];
+                                for (var i = 0; i < files.length(); ++i) {
+                                    JSONObject file = files.getJSONObject(i);
+                                    KrollDict kfile = getDocumentData(file);
+                                    kdFiles[i] = kfile;
+                                }
+                                kd.put("action", _action);
+                                kd.put("documents", kdFiles);
+                                proxy.fireEvent("database", kd);
                             }
                         } catch (AppwriteException e) {
-                            ErrorClass.reportError("list documents", e, proxy);
+                            ErrorClass.reportError(_action, e, proxy);
                         } catch (Throwable th) {
                             Log.e("ERROR", th.toString());
                         }
@@ -62,5 +77,66 @@ public class TiDatabase {
                 //
             }
         }
+    }
+
+    public void getDocument(String collectionId, String documentId) {
+        String _action = "get documents";
+
+        if (collectionId != "") {
+            Database database = new Database(client);
+            try {
+                database.getDocument(collectionId, documentId, new Continuation<Object>() {
+                    @NotNull
+                    @Override
+                    public CoroutineContext getContext() {
+                        return EmptyCoroutineContext.INSTANCE;
+                    }
+
+                    @Override
+                    public void resumeWith(@NotNull Object o) {
+                        try {
+                            if (o instanceof Result.Failure) {
+                                Result.Failure failure = (Result.Failure) o;
+                                throw failure.exception;
+                            } else {
+                                Response response = (Response) o;
+                                JSONObject json = new JSONObject(response.body().string());
+
+                                KrollDict kd = getDocumentData(json);
+                                kd.put("action", _action);
+                                proxy.fireEvent("database", kd);
+                            }
+                        } catch (AppwriteException e) {
+                            ErrorClass.reportError(_action, e, proxy);
+                        } catch (Throwable th) {
+                            Log.e("ERROR", th.toString());
+                        }
+                    }
+                });
+            } catch (Exception e) {
+                //
+            }
+        }
+    }
+
+    private KrollDict getDocumentData(JSONObject json) {
+        KrollDict kd = new KrollDict();
+        if (json != null) {
+            try {
+                kd.put("document_id", json.has("$id") ? json.get("$id") : "");
+                kd.put("permissions", json.has("$name") ? json.get("$name") : "");
+                kd.put("collection", json.has("$collection") ? json.get("$collection") : "");
+
+                for (Iterator key = json.keys(); key.hasNext();) {
+                    String keyValue = key.next().toString();
+                     if (keyValue.charAt(0) != '$') {
+                        kd.put(keyValue, json.get(keyValue));
+                    }
+                }
+            } catch (Exception e) {
+                //
+            }
+        }
+        return kd;
     }
 }

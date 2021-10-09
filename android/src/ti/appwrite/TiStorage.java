@@ -93,7 +93,6 @@ public class TiStorage {
                             JSONObject json = new JSONObject(response.body().string());
 
                             KrollDict kd = new KrollDict();
-
                             JSONArray files = new JSONArray(json.get("files").toString());
                             Object[] kdFiles = new Object[files.length()];
                             for (var i = 0; i < files.length(); ++i) {

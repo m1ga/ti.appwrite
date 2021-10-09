@@ -53,6 +53,7 @@ Full example: [app.js](example/app.js)
 * login()
 * getAccount()
 * getDocuments()
+* getDocument()
 * subscribe([])
 * unsubscribe([])
 * createFile({file, read[], write[]})
@@ -65,7 +66,7 @@ Full example: [app.js](example/app.js)
 * account
 * error: action, message, code, response
 * realtimeEvent
-* documents
+* database: e.documents for list
 * storage: e.blob for file download, e.files for file list
 * connected
 
