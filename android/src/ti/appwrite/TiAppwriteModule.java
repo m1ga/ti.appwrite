@@ -47,27 +47,6 @@ public class TiAppwriteModule extends KrollModule {
     public static void onAppCreate(TiApplication app) {
     }
 
-    public static KrollDict getUserData(String action, JSONObject json) {
-        KrollDict kd = new KrollDict();
-        kd.put("action", action);
-
-        if (json != null) {
-            try {
-                kd.put("id", json.has("$id") ? json.get("$id") : "");
-                kd.put("name", json.has("name") ? json.get("name") : "");
-                kd.put("registration", json.has("registration") ? json.get("registration") : "");
-                kd.put("status", json.has("status") ? json.get("status") : "");
-                kd.put("passwordUpdate", json.has("passwordUpdate") ? json.get("passwordUpdate") : "");
-                kd.put("email", json.has("email") ? json.get("email") : "");
-                kd.put("emailVerification", json.has("emailVerification") ? json.get("emailVerification") : "");
-                kd.put("prefs", json.has("prefs") ? json.get("prefs").toString() : "");
-            } catch (Exception e) {
-                //
-            }
-        }
-        return kd;
-    }
-
     // Methods
     @Kroll.method
     public void create(HashMap map) {
@@ -121,6 +100,21 @@ public class TiAppwriteModule extends KrollModule {
         if (!checkConnection()) return;
         if (storage != null) {
             storage.listFiles();
+        }
+    }
+    @Kroll.method
+    public void getFile(String fileId) {
+        if (!checkConnection()) return;
+        if (storage != null) {
+            storage.getFile(fileId);
+        }
+    }
+
+    @Kroll.method
+    public void downloadFile(String fileId) {
+        if (!checkConnection()) return;
+        if (storage != null) {
+            storage.downloadFile(fileId);
         }
     }
 

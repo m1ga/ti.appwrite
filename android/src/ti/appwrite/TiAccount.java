@@ -58,7 +58,7 @@ public class TiAccount {
                             Response response = (Response) o;
                             JSONObject json = new JSONObject(response.body().string());
 
-                            KrollDict kd = TiAppwriteModule.getUserData("createAccount", json);
+                            KrollDict kd = getUserData("createAccount", json);
                             proxy.fireEvent("account", kd);
                         }
                     } catch (AppwriteException e) {
@@ -101,7 +101,7 @@ public class TiAccount {
                                 Response response = (Response) o;
                                 JSONObject json = new JSONObject(response.body().string());
 
-                                KrollDict kd = TiAppwriteModule.getUserData("login", json);
+                                KrollDict kd = getUserData("login", json);
                                 proxy.fireEvent("account", kd);
                             }
                         } catch (AppwriteException e) {
@@ -178,7 +178,7 @@ public class TiAccount {
                         } else {
                             Response response = (Response) o;
                             JSONObject json = new JSONObject(response.body().string());
-                            KrollDict kd = TiAppwriteModule.getUserData("getAccount", json);
+                            KrollDict kd = getUserData("getAccount", json);
                             proxy.fireEvent("account", kd);
                         }
                     } catch (AppwriteException e) {
@@ -231,5 +231,27 @@ public class TiAccount {
         kd.put("action", action);
         proxy.fireEvent("error", kd);
 
+    }
+
+
+    private KrollDict getUserData(String action, JSONObject json) {
+        KrollDict kd = new KrollDict();
+        kd.put("action", action);
+
+        if (json != null) {
+            try {
+                kd.put("id", json.has("$id") ? json.get("$id") : "");
+                kd.put("name", json.has("name") ? json.get("name") : "");
+                kd.put("registration", json.has("registration") ? json.get("registration") : "");
+                kd.put("status", json.has("status") ? json.get("status") : "");
+                kd.put("passwordUpdate", json.has("passwordUpdate") ? json.get("passwordUpdate") : "");
+                kd.put("email", json.has("email") ? json.get("email") : "");
+                kd.put("emailVerification", json.has("emailVerification") ? json.get("emailVerification") : "");
+                kd.put("prefs", json.has("prefs") ? json.get("prefs").toString() : "");
+            } catch (Exception e) {
+                //
+            }
+        }
+        return kd;
     }
 }

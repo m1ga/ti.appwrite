@@ -207,13 +207,15 @@ win.open();
 * unsubscribe([])
 * createFile({file, read[], write[]})
 * listFiles();
+* getFile(id)
+* downloadFile(id)
 
 ## Events
 * account
 * error: action, message, code, response
 * realtimeEvent
 * documents
-* storage
+* storage: e.blob with file
 * connected
 
 ## Author
