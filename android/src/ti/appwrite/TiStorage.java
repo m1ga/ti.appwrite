@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 
 import org.appcelerator.kroll.KrollDict;
 import org.appcelerator.kroll.KrollProxy;
+import org.appcelerator.kroll.annotations.Kroll;
 import org.appcelerator.kroll.common.Log;
 import org.appcelerator.titanium.TiBlob;
 import org.json.JSONArray;
@@ -137,6 +138,40 @@ public class TiStorage {
                             JSONObject json = new JSONObject(response.body().string());
 
                             KrollDict kd = getFileData(json);
+                            kd.put("action", _action);
+                            proxy.fireEvent("storage", kd);
+                        }
+                    } catch (AppwriteException e) {
+                        ErrorClass.reportError(_action, e, proxy);
+                    } catch (Throwable th) {
+                        Log.e(LCAT, _action + th.toString());
+                    }
+                }
+            });
+        } catch (AppwriteException e) {
+            ErrorClass.reportError(_action, e, proxy);
+        }
+    }
+
+    public void deleteFile(String fileId) {
+        String _action = "delete file";
+        try {
+            storage.deleteFile(fileId, new Continuation<Response>() {
+                @NonNull
+                @Override
+                public CoroutineContext getContext() {
+                    return EmptyCoroutineContext.INSTANCE;
+                }
+
+                @Override
+                public void resumeWith(@NonNull Object o) {
+                    try {
+                        if (o instanceof Result.Failure) {
+                            Result.Failure failure = (Result.Failure) o;
+                            throw failure.exception;
+                        } else {
+                            Response response = (Response) o;
+                            KrollDict kd = new KrollDict();
                             kd.put("action", _action);
                             proxy.fireEvent("storage", kd);
                         }

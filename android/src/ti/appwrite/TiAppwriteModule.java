@@ -102,10 +102,11 @@ public class TiAppwriteModule extends KrollModule {
             storage.listFiles();
         }
     }
+
     @Kroll.method
     public void getFile(String fileId) {
         if (!checkConnection()) return;
-        if (storage != null) {
+        if (storage != null && fileId != "") {
             storage.getFile(fileId);
         }
     }
@@ -113,8 +114,16 @@ public class TiAppwriteModule extends KrollModule {
     @Kroll.method
     public void downloadFile(String fileId) {
         if (!checkConnection()) return;
-        if (storage != null) {
+        if (storage != null && fileId != "") {
             storage.downloadFile(fileId);
+        }
+    }
+
+    @Kroll.method
+    public void deleteFile(String fileId) {
+        if (!checkConnection()) return;
+        if (storage != null && fileId != "") {
+            storage.deleteFile(fileId);
         }
     }
 
