@@ -4,7 +4,6 @@ import androidx.annotation.NonNull;
 
 import org.appcelerator.kroll.KrollDict;
 import org.appcelerator.kroll.KrollProxy;
-import org.appcelerator.kroll.annotations.Kroll;
 import org.appcelerator.kroll.common.Log;
 import org.appcelerator.titanium.util.TiConvert;
 import org.jetbrains.annotations.NotNull;
@@ -306,7 +305,7 @@ public class TiAccount {
             try {
                 kd.put("session_id", json.has("$id") ? json.get("$id") : "");
 
-                for (Iterator key = json.keys(); key.hasNext();) {
+                for (Iterator key = json.keys(); key.hasNext(); ) {
                     String keyValue = key.next().toString();
                     if (keyValue.charAt(0) != '$') {
                         kd.put(keyValue, json.get(keyValue));

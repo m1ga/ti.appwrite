@@ -1,5 +1,5 @@
 const appwrite = require("ti.appwrite");
-const SERVER_URL = "http://192.168.0.1/v1"
+const SERVER_URL = "http://192.168.0.1:81/v1"
 const PROJECT_ID = "6158b304b0412";
 const DATABASE_ID = "61598461e8cd9";
 var fileId = "";
@@ -10,16 +10,22 @@ var USER_PASSWORD = "1234password"
 
 var btns = [
 	["connect", onClickConnect],
+	["-"],
 	["create account", onClickCreate],
 	["verify mail", onClickVerify],
 	["delete account", onClickDelete],
 	["create session", onClickLogin],
 	["delete session", onClickDeleteSession],
 	["get account", onClickGetAccount],
+	["-"],
 	["get documents", onClickGetDocuments],
 	["get document", onClickGetDocument],
+	["create document", onClickCreateDocument],
+	["delete document", onClickDeleteDocument],
+	["-"],
 	["subscribe", onClickSub],
 	["unsubscribe", onClickUnsub],
+	["-"],
 	["create file", onClickCreateFile],
 	["list files", onClickListFiles],
 	["get file", onClickGetFile],
@@ -56,13 +62,20 @@ win.add(scrollView)
 var btnArray = [];
 
 _.each(btns, function(btn) {
-	var button = Ti.UI.createButton({
-		title: btn[0],
-		width: 200,
-		height: 50
-	});
-	button.addEventListener("click", btn[1]);
-	btnArray.push(button);
+	if (btn[0] == "-") {
+		var view = Ti.UI.createView({
+			height: 10
+		});
+		btnArray.push(view);
+	} else {
+		var button = Ti.UI.createButton({
+			title: btn[0],
+			width: 200,
+			height: 50
+		});
+		button.addEventListener("click", btn[1]);
+		btnArray.push(button);
+	}
 })
 scrollView.add(btnArray);
 btnArray[0].backgroundColor = "#f44";
@@ -82,8 +95,10 @@ appwrite.addEventListener("database", function(e) {
 	if (e.documents) {
 		console.log("data: " + JSON.stringify(e.documents));
 
-		documentId = e.documents[0]["document_id"];
-		console.log(documentId);
+		if (e.documents.length > 0) {
+			documentId = e.documents[0]["document_id"];
+			console.log(documentId);
+		}
 	} else if (e.data) {
 		console.log("data: " + e.data);
 	} else {
@@ -179,6 +194,17 @@ function onClickGetDocument(e) {
 	appwrite.getDocument(DATABASE_ID, documentId);
 }
 
+function onClickCreateDocument(e) {
+	appwrite.createDocument(DATABASE_ID, {
+		id: 2,
+		title: "test2"
+	});
+}
+
+function onClickDeleteDocument(e) {
+	appwrite.deleteDocument(DATABASE_ID, documentId);
+}
+
 function onClickGetAccount(e) {
 	appwrite.getAccount();
 }
@@ -227,6 +253,7 @@ function onClickDeleteFile(e) {
 		appwrite.deleteFile(fileId);
 	}
 }
+
 function onClickDeleteSession(e) {
 	if (sessionId != "") {
 		appwrite.deleteSession(sessionId);

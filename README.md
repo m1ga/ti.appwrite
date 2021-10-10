@@ -55,6 +55,8 @@ Full example: [app.js](example/app.js)
 
 * getDocuments()
 * getDocument()
+* deleteDocument()
+* createDocument({})
 
 * subscribe([])
 * unsubscribe([])

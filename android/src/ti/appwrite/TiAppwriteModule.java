@@ -16,7 +16,6 @@ import org.appcelerator.titanium.TiApplication;
 import org.appcelerator.titanium.TiFileProxy;
 import org.appcelerator.titanium.io.TiBaseFile;
 import org.appcelerator.titanium.util.TiConvert;
-import org.json.JSONObject;
 
 import java.util.HashMap;
 
@@ -148,6 +147,7 @@ public class TiAppwriteModule extends KrollModule {
             database.getDocuments(collectionId);
         }
     }
+
     @Kroll.method
     public void getDocument(String collectionId, String documentId) {
         if (!checkConnection()) return;
@@ -157,10 +157,27 @@ public class TiAppwriteModule extends KrollModule {
     }
 
     @Kroll.method
+    public void createDocument(String collectionId, HashMap data) {
+        if (!checkConnection()) return;
+        if (collectionId != "" ) {
+            database.createDocument(collectionId, data);
+        }
+    }
+
+    @Kroll.method
+    public void deleteDocument(String collectionId, String documentId) {
+        if (!checkConnection()) return;
+        if (collectionId != "" && documentId != "") {
+            database.deleteDocument(collectionId, documentId);
+        }
+    }
+
+    @Kroll.method
     public void createSession(HashMap map) {
         if (!checkConnection()) return;
         account.createSession(map);
     }
+
     @Kroll.method
     public void deleteSession(String sessionId) {
         if (!checkConnection()) return;
@@ -227,7 +244,7 @@ public class TiAppwriteModule extends KrollModule {
 
     @Kroll.getProperty
     public String endpoint() {
-        if (client == null){
+        if (client == null) {
             return "";
         }
         return client.getEndPoint();
@@ -253,8 +270,8 @@ public class TiAppwriteModule extends KrollModule {
     }
 
 
-    public boolean checkConnection(){
-        if (isConnected == false){
+    public boolean checkConnection() {
+        if (isConnected == false) {
             KrollDict kd = new KrollDict();
             kd.put("action", "connection");
             kd.put("message", "no active connection");

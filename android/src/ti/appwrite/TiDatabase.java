@@ -7,12 +7,12 @@ import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.util.HashMap;
 import java.util.Iterator;
 
 import io.appwrite.Client;
 import io.appwrite.exceptions.AppwriteException;
 import io.appwrite.services.Database;
-import io.appwrite.services.Storage;
 import kotlin.Result;
 import kotlin.coroutines.Continuation;
 import kotlin.coroutines.CoroutineContext;
@@ -21,7 +21,7 @@ import okhttp3.Response;
 
 public class TiDatabase {
     String LCAT = "TiDatabase";
-    Database database  = null;
+    Database database = null;
     private Client client = null;
     private KrollProxy proxy = null;
 
@@ -30,6 +30,48 @@ public class TiDatabase {
         database = new Database(client);
         proxy = _proxy;
     }
+
+    public void createDocument(String collectionId, HashMap objectData) {
+        String _action = "create document";
+
+        if (collectionId != "") {
+            Database database = new Database(client);
+            try {
+                JSONObject jsonArray = new JSONObject(objectData);
+                database.createDocument(collectionId, objectData, new Continuation<Object>() {
+                    @NotNull
+                    @Override
+                    public CoroutineContext getContext() {
+                        return EmptyCoroutineContext.INSTANCE;
+                    }
+
+                    @Override
+                    public void resumeWith(@NotNull Object o) {
+                        try {
+                            if (o instanceof Result.Failure) {
+                                Result.Failure failure = (Result.Failure) o;
+                                throw failure.exception;
+                            } else {
+                                Response response = (Response) o;
+                                JSONObject json = new JSONObject(response.body().string());
+
+                                KrollDict kd = getDocumentData(json);
+                                kd.put("action", _action);
+                                proxy.fireEvent("database", kd);
+                            }
+                        } catch (AppwriteException e) {
+                            ErrorClass.reportError(_action, e, proxy);
+                        } catch (Throwable th) {
+                            Log.e("ERROR", th.toString());
+                        }
+                    }
+                });
+            } catch (Exception e) {
+                //
+            }
+        }
+    }
+
 
     public void getDocuments(String collectionId) {
         String _action = "get documents";
@@ -80,9 +122,9 @@ public class TiDatabase {
     }
 
     public void getDocument(String collectionId, String documentId) {
-        String _action = "get documents";
+        String _action = "get document";
 
-        if (collectionId != "") {
+        if (collectionId != "" && documentId != "") {
             Database database = new Database(client);
             try {
                 database.getDocument(collectionId, documentId, new Continuation<Object>() {
@@ -101,8 +143,44 @@ public class TiDatabase {
                             } else {
                                 Response response = (Response) o;
                                 JSONObject json = new JSONObject(response.body().string());
-
                                 KrollDict kd = getDocumentData(json);
+                                kd.put("action", _action);
+                                proxy.fireEvent("database", kd);
+                            }
+                        } catch (AppwriteException e) {
+                            ErrorClass.reportError(_action, e, proxy);
+                        } catch (Throwable th) {
+                            Log.e("ERROR", th.toString());
+                        }
+                    }
+                });
+            } catch (Exception e) {
+                //
+            }
+        }
+    }
+
+    public void deleteDocument(String collectionId, String documentId) {
+        String _action = "delete documents";
+
+        if (collectionId != "") {
+            Database database = new Database(client);
+            try {
+                database.deleteDocument(collectionId, documentId, new Continuation<Object>() {
+                    @NotNull
+                    @Override
+                    public CoroutineContext getContext() {
+                        return EmptyCoroutineContext.INSTANCE;
+                    }
+
+                    @Override
+                    public void resumeWith(@NotNull Object o) {
+                        try {
+                            if (o instanceof Result.Failure) {
+                                Result.Failure failure = (Result.Failure) o;
+                                throw failure.exception;
+                            } else {
+                                KrollDict kd = new KrollDict();
                                 kd.put("action", _action);
                                 proxy.fireEvent("database", kd);
                             }
@@ -127,9 +205,9 @@ public class TiDatabase {
                 kd.put("permissions", json.has("$name") ? json.get("$name") : "");
                 kd.put("collection", json.has("$collection") ? json.get("$collection") : "");
 
-                for (Iterator key = json.keys(); key.hasNext();) {
+                for (Iterator key = json.keys(); key.hasNext(); ) {
                     String keyValue = key.next().toString();
-                     if (keyValue.charAt(0) != '$') {
+                    if (keyValue.charAt(0) != '$') {
                         kd.put(keyValue, json.get(keyValue));
                     }
                 }
