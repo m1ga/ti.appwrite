@@ -50,12 +50,15 @@ Full example: [app.js](example/app.js)
 * create()
 * createAccount()
 * deleteAccount();
-* login()
+* createSession()
 * getAccount()
+
 * getDocuments()
 * getDocument()
+
 * subscribe([])
 * unsubscribe([])
+
 * createFile({file, read[], write[]})
 * listFiles();
 * getFile(id)

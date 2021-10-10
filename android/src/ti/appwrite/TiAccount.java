@@ -4,12 +4,14 @@ import androidx.annotation.NonNull;
 
 import org.appcelerator.kroll.KrollDict;
 import org.appcelerator.kroll.KrollProxy;
+import org.appcelerator.kroll.annotations.Kroll;
 import org.appcelerator.kroll.common.Log;
 import org.appcelerator.titanium.util.TiConvert;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 
 import java.util.HashMap;
+import java.util.Iterator;
 
 import io.appwrite.Client;
 import io.appwrite.exceptions.AppwriteException;
@@ -73,7 +75,7 @@ public class TiAccount {
     }
 
 
-    public void login(HashMap map) {
+    public void createSession(HashMap map) {
         if (account == null) {
             return;
         }
@@ -101,7 +103,7 @@ public class TiAccount {
                                 Response response = (Response) o;
                                 JSONObject json = new JSONObject(response.body().string());
 
-                                KrollDict kd = getUserData("login", json);
+                                KrollDict kd = getSessionData("login", json);
                                 proxy.fireEvent("account", kd);
                             }
                         } catch (AppwriteException e) {
@@ -112,6 +114,47 @@ public class TiAccount {
                 });
             } catch (AppwriteException e) {
                 ErrorClass.reportError("login", e, proxy);
+            }
+        }
+    }
+
+    public void deleteSession(String sessionId) {
+        String _action = "delete session";
+        if (account == null) {
+            return;
+        }
+
+        if (sessionId != "") {
+            try {
+                account.deleteSession(sessionId, new Continuation<Object>() {
+                    @NotNull
+                    @Override
+                    public CoroutineContext getContext() {
+                        return EmptyCoroutineContext.INSTANCE;
+                    }
+
+                    @Override
+                    public void resumeWith(@NotNull Object o) {
+
+                        try {
+                            if (o instanceof Result.Failure) {
+                                Result.Failure failure = (Result.Failure) o;
+                                throw failure.exception;
+                            } else {
+                                Response response = (Response) o;
+                                JSONObject json = new JSONObject(response.body().string());
+                                KrollDict kd = new KrollDict();
+                                kd.put("action", _action);
+                                proxy.fireEvent("account", kd);
+                            }
+                        } catch (AppwriteException e) {
+                            ErrorClass.reportError(_action, e, proxy);
+                        } catch (Throwable th) {
+                        }
+                    }
+                });
+            } catch (AppwriteException e) {
+                ErrorClass.reportError(_action, e, proxy);
             }
         }
     }
@@ -248,6 +291,27 @@ public class TiAccount {
                 kd.put("email", json.has("email") ? json.get("email") : "");
                 kd.put("emailVerification", json.has("emailVerification") ? json.get("emailVerification") : "");
                 kd.put("prefs", json.has("prefs") ? json.get("prefs").toString() : "");
+            } catch (Exception e) {
+                //
+            }
+        }
+        return kd;
+    }
+
+    private KrollDict getSessionData(String action, JSONObject json) {
+        KrollDict kd = new KrollDict();
+        kd.put("action", action);
+
+        if (json != null) {
+            try {
+                kd.put("session_id", json.has("$id") ? json.get("$id") : "");
+
+                for (Iterator key = json.keys(); key.hasNext();) {
+                    String keyValue = key.next().toString();
+                    if (keyValue.charAt(0) != '$') {
+                        kd.put(keyValue, json.get(keyValue));
+                    }
+                }
             } catch (Exception e) {
                 //
             }

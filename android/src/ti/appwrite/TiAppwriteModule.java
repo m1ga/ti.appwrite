@@ -157,9 +157,14 @@ public class TiAppwriteModule extends KrollModule {
     }
 
     @Kroll.method
-    public void login(HashMap map) {
+    public void createSession(HashMap map) {
         if (!checkConnection()) return;
-        account.login(map);
+        account.createSession(map);
+    }
+    @Kroll.method
+    public void deleteSession(String sessionId) {
+        if (!checkConnection()) return;
+        account.deleteSession(sessionId);
     }
 
     @Kroll.method

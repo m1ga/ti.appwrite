@@ -1,17 +1,23 @@
 const appwrite = require("ti.appwrite");
 const SERVER_URL = "http://192.168.0.1/v1"
-const PROJECT_ID = "12345";
-const DATABASE_ID = "123456";
+const PROJECT_ID = "6158b304b0412";
+const DATABASE_ID = "61598461e8cd9";
 var fileId = "";
+var documentId = "";
+var sessionId = "";
+var USER_MAIL = "mail@mail.com";
+var USER_PASSWORD = "1234password"
 
 var btns = [
 	["connect", onClickConnect],
 	["create account", onClickCreate],
 	["verify mail", onClickVerify],
 	["delete account", onClickDelete],
-	["login", onClickLogin],
+	["create session", onClickLogin],
+	["delete session", onClickDeleteSession],
 	["get account", onClickGetAccount],
 	["get documents", onClickGetDocuments],
+	["get document", onClickGetDocument],
 	["subscribe", onClickSub],
 	["unsubscribe", onClickUnsub],
 	["create file", onClickCreateFile],
@@ -71,9 +77,18 @@ appwrite.addEventListener("error", function(e) {
 	log.value += e.action + " " + e.message + "\n";
 })
 
-appwrite.addEventListener("documents", function(e) {
-	console.log("---documents---");
-	console.log("data: " + e.data);
+appwrite.addEventListener("database", function(e) {
+	console.log("---database---");
+	if (e.documents) {
+		console.log("data: " + JSON.stringify(e.documents));
+
+		documentId = e.documents[0]["document_id"];
+		console.log(documentId);
+	} else if (e.data) {
+		console.log("data: " + e.data);
+	} else {
+		console.log(e);
+	}
 	console.log("");
 })
 appwrite.addEventListener("storage", function(e) {
@@ -106,6 +121,10 @@ appwrite.addEventListener("account", function(e) {
 	console.log("Action:", e.action);
 	console.log(e);
 	console.log("");
+	if (e.session_id) {
+		sessionId = e.session_id;
+		console.log(sessionId);
+	}
 })
 appwrite.addEventListener("connected", function(e) {
 	btnArray[0].backgroundColor = "#4f4";
@@ -117,17 +136,16 @@ function onClickSub(e) {
 
 
 function onClickLogin(e) {
-	appwrite.login({
-		email: "mail@test.com",
-		password: "password"
+	appwrite.createSession({
+		email: USER_MAIL,
+		password: USER_PASSWORD
 	});
-
 }
 
 function onClickCreate(e) {
 	appwrite.createAccount({
-		email: "mail@test.com",
-		password: "password"
+		email: USER_MAIL,
+		password: USER_PASSWORD
 	});
 
 }
@@ -155,6 +173,10 @@ function onClickConnect(e) {
 
 function onClickGetDocuments(e) {
 	appwrite.getDocuments(DATABASE_ID);
+}
+
+function onClickGetDocument(e) {
+	appwrite.getDocument(DATABASE_ID, documentId);
 }
 
 function onClickGetAccount(e) {
@@ -199,9 +221,15 @@ function onClickDownloadFile(e) {
 		appwrite.downloadFile(fileId);
 	}
 }
+
 function onClickDeleteFile(e) {
 	if (fileId != "") {
 		appwrite.deleteFile(fileId);
+	}
+}
+function onClickDeleteSession(e) {
+	if (sessionId != "") {
+		appwrite.deleteSession(sessionId);
 	}
 }
 
