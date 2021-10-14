@@ -35,7 +35,7 @@ public class TiStorage {
     }
 
     public void createFile(File file, String[] _read, String[] _write) {
-        String _action = "create file";
+        String _action = "createFile";
         try {
             storage.createFile(file, Arrays.asList(_read.clone()), Arrays.asList(_write.clone()), new Continuation<Response>() {
                 @NonNull
@@ -53,8 +53,8 @@ public class TiStorage {
                         } else {
                             Response response = (Response) o;
                             JSONObject json = new JSONObject(response.body().string());
-
-                            KrollDict kd = new KrollDict();
+                            KrollDict kd = getFileData(json);
+                            kd.put("action", _action);
                             proxy.fireEvent("storage", kd);
                         }
                     } catch (AppwriteException e) {
@@ -70,7 +70,7 @@ public class TiStorage {
     }
 
     public void listFiles() {
-        String _action = "list files";
+        String _action = "listFiles";
         try {
             storage.listFiles(new Continuation<Response>() {
                 @NonNull
@@ -114,7 +114,7 @@ public class TiStorage {
     }
 
     public void getFile(String fileId) {
-        String _action = "get file";
+        String _action = "getFile";
         try {
             storage.getFile(fileId, new Continuation<Response>() {
                 @NonNull
@@ -150,7 +150,7 @@ public class TiStorage {
     }
 
     public void deleteFile(String fileId) {
-        String _action = "delete file";
+        String _action = "deleteFile";
         try {
             storage.deleteFile(fileId, new Continuation<Response>() {
                 @NonNull
@@ -184,7 +184,7 @@ public class TiStorage {
     }
 
     public void downloadFile(String fileId) {
-        String _action = "download file";
+        String _action = "downloadFile";
         try {
             storage.getFileDownload(fileId, new Continuation<Response>() {
                 @NonNull
