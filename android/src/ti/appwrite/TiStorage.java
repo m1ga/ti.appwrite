@@ -6,11 +6,13 @@ import org.appcelerator.kroll.KrollDict;
 import org.appcelerator.kroll.KrollProxy;
 import org.appcelerator.kroll.common.Log;
 import org.appcelerator.titanium.TiBlob;
+import org.appcelerator.titanium.util.TiConvert;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.HashMap;
 
 import io.appwrite.Client;
 import io.appwrite.exceptions.AppwriteException;
@@ -216,6 +218,49 @@ public class TiStorage {
             });
         } catch (AppwriteException e) {
             ErrorClass.reportError(_action, e, proxy);
+        }
+    }
+
+    public void getPreview(HashMap data) {
+        String _action = "previewFile";
+        String fileId = TiConvert.toString(data.get("id"), "");
+        int width = TiConvert.toInt(data.get("width"), -1);
+        int height = TiConvert.toInt(data.get("height"), -1);
+        int quality = TiConvert.toInt(data.get("quality"), 100);
+
+        if (fileId != "") {
+            try {
+                storage.getFilePreview(fileId, width == -1 ? null : width, height == -1 ? null : height, null, quality, new Continuation<Response>() {
+                    @NonNull
+                    @Override
+                    public CoroutineContext getContext() {
+                        return EmptyCoroutineContext.INSTANCE;
+                    }
+
+                    @Override
+                    public void resumeWith(@NonNull Object o) {
+                        try {
+                            if (o instanceof Result.Failure) {
+                                Result.Failure failure = (Result.Failure) o;
+                                throw failure.exception;
+                            } else {
+                                Response response = (Response) o;
+                                KrollDict kd = new KrollDict();
+                                kd.put("action", _action);
+                                kd.put("blob", TiBlob.blobFromData(response.body().bytes()));
+                                proxy.fireEvent("storage", kd);
+
+                            }
+                        } catch (AppwriteException e) {
+                            ErrorClass.reportError(_action, e, proxy);
+                        } catch (Throwable th) {
+                            Log.e(LCAT, _action + th.toString());
+                        }
+                    }
+                });
+            } catch (AppwriteException e) {
+                ErrorClass.reportError(_action, e, proxy);
+            }
         }
     }
 

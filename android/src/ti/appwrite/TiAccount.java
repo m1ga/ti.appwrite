@@ -34,6 +34,7 @@ public class TiAccount {
     }
 
     public void createAccount(HashMap map) {
+        String _action = "createAccount";
         String email = TiConvert.toString(map.get("email"), "");
         String password = TiConvert.toString(map.get("password"), "");
 
@@ -59,17 +60,17 @@ public class TiAccount {
                             Response response = (Response) o;
                             JSONObject json = new JSONObject(response.body().string());
 
-                            KrollDict kd = getUserData("createAccount", json);
+                            KrollDict kd = getUserData(_action, json);
                             proxy.fireEvent("account", kd);
                         }
                     } catch (AppwriteException e) {
-                        ErrorClass.reportError("create account", e, proxy);
+                        ErrorClass.reportError(_action, e, proxy);
                     } catch (Throwable th) {
                     }
                 }
             });
         } catch (AppwriteException e) {
-            ErrorClass.reportError("create account", e, proxy);
+            ErrorClass.reportError(_action, e, proxy);
         }
     }
 
@@ -78,7 +79,7 @@ public class TiAccount {
         if (account == null) {
             return;
         }
-
+        String _action = "login";
         String email = TiConvert.toString(map.get("email"), "");
         String password = TiConvert.toString(map.get("password"), "");
 
@@ -102,23 +103,23 @@ public class TiAccount {
                                 Response response = (Response) o;
                                 JSONObject json = new JSONObject(response.body().string());
 
-                                KrollDict kd = getSessionData("login", json);
+                                KrollDict kd = getSessionData(_action, json);
                                 proxy.fireEvent("account", kd);
                             }
                         } catch (AppwriteException e) {
-                            ErrorClass.reportError("login", e, proxy);
+                            ErrorClass.reportError(_action, e, proxy);
                         } catch (Throwable th) {
                         }
                     }
                 });
             } catch (AppwriteException e) {
-                ErrorClass.reportError("login", e, proxy);
+                ErrorClass.reportError(_action, e, proxy);
             }
         }
     }
 
     public void deleteSession(String sessionId) {
-        String _action = "delete session";
+        String _action = "deleteSession";
         if (account == null) {
             return;
         }
@@ -162,6 +163,7 @@ public class TiAccount {
         if (account == null && url != "") {
             return;
         }
+        String _action = "verifyMail";
         try {
             account.createVerification(url,
                     new Continuation<Object>() {
@@ -186,14 +188,14 @@ public class TiAccount {
                                     //proxy.fireEvent("account", kd);
                                 }
                             } catch (AppwriteException e) {
-                                ErrorClass.reportError("verify mail", e, proxy);
+                                ErrorClass.reportError(_action, e, proxy);
                             } catch (Throwable th) {
                             }
                         }
                     }
             );
         } catch (AppwriteException e) {
-            ErrorClass.reportError("verify mail", e, proxy);
+            ErrorClass.reportError(_action, e, proxy);
         }
 
     }
@@ -202,6 +204,7 @@ public class TiAccount {
         if (account == null) {
             return;
         }
+        String _action = "getAccount";
         try {
             account.get(new Continuation<Object>() {
                 @NotNull
@@ -220,17 +223,17 @@ public class TiAccount {
                         } else {
                             Response response = (Response) o;
                             JSONObject json = new JSONObject(response.body().string());
-                            KrollDict kd = getUserData("getAccount", json);
+                            KrollDict kd = getUserData(_action, json);
                             proxy.fireEvent("account", kd);
                         }
                     } catch (AppwriteException e) {
-                        ErrorClass.reportError("get account", e, proxy);
+                        ErrorClass.reportError(_action, e, proxy);
                     } catch (Throwable th) {
                     }
                 }
             });
         } catch (AppwriteException e) {
-            ErrorClass.reportError("get account", e, proxy);
+            ErrorClass.reportError(_action, e, proxy);
         }
     }
 
@@ -238,6 +241,7 @@ public class TiAccount {
         if (account == null) {
             return;
         }
+        String _action = "deleteAccount";
         try {
             account.delete(new Continuation<Response>() {
                 @NonNull
@@ -254,17 +258,17 @@ public class TiAccount {
                             throw failure.exception;
                         } else {
                             KrollDict kd = new KrollDict();
-                            kd.put("deleteAccount", true);
+                            kd.put(_action, true);
                             proxy.fireEvent("account", kd);
                         }
                     } catch (AppwriteException e) {
-                        ErrorClass.reportError("delete account", e, proxy);
+                        ErrorClass.reportError(_action, e, proxy);
                     } catch (Throwable throwable) {
                     }
                 }
             });
         } catch (AppwriteException e) {
-            ErrorClass.reportError("delete account", e, proxy);
+            ErrorClass.reportError(_action, e, proxy);
         }
     }
 

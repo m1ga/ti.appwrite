@@ -32,7 +32,7 @@ public class TiDatabase {
     }
 
     public void createDocument(String collectionId, HashMap objectData) {
-        String _action = "create document";
+        String _action = "createDocument";
 
         if (collectionId != "") {
             Database database = new Database(client);
@@ -74,7 +74,7 @@ public class TiDatabase {
 
 
     public void getDocuments(String collectionId) {
-        String _action = "get documents";
+        String _action = "getDocuments";
 
         if (collectionId != "") {
             Database database = new Database(client);
@@ -122,7 +122,7 @@ public class TiDatabase {
     }
 
     public void getDocument(String collectionId, String documentId) {
-        String _action = "get document";
+        String _action = "getDocument";
 
         if (collectionId != "" && documentId != "") {
             Database database = new Database(client);
@@ -161,7 +161,7 @@ public class TiDatabase {
     }
 
     public void deleteDocument(String collectionId, String documentId) {
-        String _action = "delete documents";
+        String _action = "deleteDocuments";
 
         if (collectionId != "") {
             Database database = new Database(client);

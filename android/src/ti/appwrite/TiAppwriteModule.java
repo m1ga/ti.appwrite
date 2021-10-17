@@ -125,6 +125,13 @@ public class TiAppwriteModule extends KrollModule {
             storage.deleteFile(fileId);
         }
     }
+    @Kroll.method
+    public void getPreview(HashMap data) {
+        if (!checkConnection()) return;
+        if (storage != null) {
+            storage.getPreview(data);
+        }
+    }
 
     @Kroll.method
     public void unsubscribe(Object _input) {

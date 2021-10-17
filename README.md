@@ -64,6 +64,7 @@ Full example: [app.js](example/app.js)
 * createFile({file, read[], write[]})
 * listFiles();
 * getFile(id)
+* getPreview({id:string, width?:int, height?:int, quality?:int})
 * downloadFile(id)
 * deleteFile(id);
 

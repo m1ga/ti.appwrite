@@ -1,12 +1,12 @@
 const appwrite = require("ti.appwrite");
-const SERVER_URL = "http://192.168.0.1:81/v1"
-const PROJECT_ID = "6158b304b0412";
-const DATABASE_ID = "61598461e8cd9";
+const SERVER_URL = "http://192.168.0.1:80/v1";
+const PROJECT_ID = "61684fb485ee5";
+const DATABASE_ID = "616c139208ffd";
 var fileId = "";
 var documentId = "";
 var sessionId = "";
 var USER_MAIL = "mail@mail.com";
-var USER_PASSWORD = "1234password"
+var USER_PASSWORD = "1234password";
 
 var btns = [
 	["connect", onClickConnect],
@@ -29,25 +29,25 @@ var btns = [
 	["create file", onClickCreateFile],
 	["list files", onClickListFiles],
 	["get file", onClickGetFile],
+	["get preview", onClickGetPreview],
 	["download file", onClickDownloadFile],
-	["delete file", onClickDeleteFile]
+	["delete file", onClickDeleteFile],
 ];
 
 var win = Ti.UI.createWindow({
-	backgroundColor: '#fff',
-
+	backgroundColor: "#fff",
 });
 var log = Ti.UI.createTextArea({
 	top: 0,
 	width: Ti.UI.FILL,
 	height: 100,
-	borderColor: 'red',
+	borderColor: "red",
 	borderWidth: 1,
 	color: "#fff",
 	backgroundColor: "#333",
 	font: {
-		fontSize: 14
-	}
+		fontSize: 14,
+	},
 });
 win.add(log);
 var scrollView = Ti.UI.createScrollView({
@@ -55,40 +55,40 @@ var scrollView = Ti.UI.createScrollView({
 	bottom: 0,
 	contentWidth: Ti.UI.FILL,
 	contentHeight: Ti.UI.SIZE,
-	layout: 'vertical'
-})
-win.add(scrollView)
+	layout: "vertical",
+});
+win.add(scrollView);
 
 var btnArray = [];
 
 _.each(btns, function(btn) {
 	if (btn[0] == "-") {
 		var view = Ti.UI.createView({
-			height: 10
+			height: 10,
 		});
 		btnArray.push(view);
 	} else {
 		var button = Ti.UI.createButton({
 			title: btn[0],
 			width: 200,
-			height: 50
+			height: 50,
 		});
 		button.addEventListener("click", btn[1]);
 		btnArray.push(button);
 	}
-})
+});
 scrollView.add(btnArray);
 btnArray[0].backgroundColor = "#f44";
 
 appwrite.addEventListener("realtimeEvent", function(e) {
 	console.log("event: " + e.action);
-})
+});
 
 appwrite.addEventListener("error", function(e) {
 	console.error("error: " + e.action);
 	console.error(e);
 	log.value += e.action + " " + e.message + "\n";
-})
+});
 
 appwrite.addEventListener("database", function(e) {
 	console.log("---database---");
@@ -105,19 +105,20 @@ appwrite.addEventListener("database", function(e) {
 		console.log(e);
 	}
 	console.log("");
-})
+});
+
 appwrite.addEventListener("storage", function(e) {
 	console.log("---storage---");
 	if (e.blob) {
 		var img = Ti.UI.createImageView({
 			width: 300,
 			height: 300,
-			image: e.blob
+			image: e.blob,
 		});
 		win.add(img);
 		img.addEventListener("click", function() {
 			win.remove(img);
-		})
+		});
 	} else if (e.data) {
 		console.log("data: " + e.data);
 	} else if (e.files) {
@@ -129,7 +130,7 @@ appwrite.addEventListener("storage", function(e) {
 		console.log(e);
 	}
 	console.log("");
-})
+});
 
 appwrite.addEventListener("account", function(e) {
 	console.log("---account---");
@@ -140,29 +141,28 @@ appwrite.addEventListener("account", function(e) {
 		sessionId = e.session_id;
 		console.log(sessionId);
 	}
-})
+});
+
 appwrite.addEventListener("connected", function(e) {
 	btnArray[0].backgroundColor = "#4f4";
-})
+});
 
 function onClickSub(e) {
 	appwrite.subscribe(["files", "account"]);
 }
 
-
 function onClickLogin(e) {
 	appwrite.createSession({
 		email: USER_MAIL,
-		password: USER_PASSWORD
+		password: USER_PASSWORD,
 	});
 }
 
 function onClickCreate(e) {
 	appwrite.createAccount({
 		email: USER_MAIL,
-		password: USER_PASSWORD
+		password: USER_PASSWORD,
 	});
-
 }
 
 function onClickDelete(e) {
@@ -178,7 +178,7 @@ function onClickConnect(e) {
 		endpoint: SERVER_URL,
 		project: PROJECT_ID,
 		selfSigned: true,
-		channels: ["files", "account"]
+		channels: ["files", "account"],
 	});
 
 	// appwrite.endpoint = SERVER_URL;
@@ -197,7 +197,7 @@ function onClickGetDocument(e) {
 function onClickCreateDocument(e) {
 	appwrite.createDocument(DATABASE_ID, {
 		id: 2,
-		title: "test2"
+		title: "test2",
 	});
 }
 
@@ -213,13 +213,18 @@ function onClickVerify(e) {
 	appwrite.verifyMail(SERVER_URL);
 }
 
-
 function onClickCreateFile(e) {
-	var file = Ti.Filesystem.getFile(Ti.Filesystem.externalStorageDirectory, "appicon.png");
+	var file = Ti.Filesystem.getFile(
+		Ti.Filesystem.externalStorageDirectory,
+		"appicon.png"
+	);
 
 	if (!file.exists()) {
 		// copy it from /assets/ to the external storage
-		var source = Ti.Filesystem.getFile(Ti.Filesystem.resourcesDirectory, "appicon.png");
+		var source = Ti.Filesystem.getFile(
+			Ti.Filesystem.resourcesDirectory,
+			"appicon.png"
+		);
 		file.write(source.read());
 	}
 
@@ -227,7 +232,7 @@ function onClickCreateFile(e) {
 		appwrite.createFile({
 			file: file,
 			read: ["*"],
-			write: ["*"]
+			write: ["*"],
 		});
 	}
 }
@@ -239,6 +244,17 @@ function onClickListFiles(e) {
 function onClickGetFile(e) {
 	if (fileId != "") {
 		appwrite.getFile(fileId);
+	}
+}
+
+function onClickGetPreview(e) {
+	if (fileId != "") {
+		appwrite.getPreview({
+			id: fileId,
+			width: 10,
+			height: 10,
+			quality: 50,
+		});
 	}
 }
 
