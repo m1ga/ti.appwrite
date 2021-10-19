@@ -48,8 +48,10 @@ Full example: [app.js](example/app.js)
 ## Methods
 
 * create()
+* checkConnection()
+
 * createAccount()
-* deleteAccount();
+* deleteAccount()
 * createSession()
 * getAccount()
 
@@ -74,7 +76,7 @@ Full example: [app.js](example/app.js)
 * realtimeEvent
 * database: e.documents for list
 * storage: e.blob for file download, e.files for file list
-* connected
+* connection: status (true/false)
 
 ## Author
 

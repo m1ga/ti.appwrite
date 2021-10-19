@@ -17,6 +17,8 @@ import org.appcelerator.titanium.TiFileProxy;
 import org.appcelerator.titanium.io.TiBaseFile;
 import org.appcelerator.titanium.util.TiConvert;
 
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.HashMap;
 
 import io.appwrite.Client;
@@ -36,7 +38,7 @@ public class TiAppwriteModule extends KrollModule {
     private Client client = null;
     private String projectId = "";
     private boolean isSelfSigned = false;
-    private boolean isConnected = false;
+    private boolean isConfigured = false;
 
     public TiAppwriteModule() {
         super();
@@ -44,6 +46,7 @@ public class TiAppwriteModule extends KrollModule {
 
     @Kroll.onAppCreate
     public static void onAppCreate(TiApplication app) {
+
     }
 
     // Methods
@@ -59,7 +62,7 @@ public class TiAppwriteModule extends KrollModule {
             endpoint(_endpoint);
             project(_project);
             selfSigned(isSelfSigned);
-            isConnected = true;
+            isConfigured = true;
 
             if (_channels != null) {
                 subscribeChannels(_channels);
@@ -67,13 +70,11 @@ public class TiAppwriteModule extends KrollModule {
             account = new TiAccount(client, this);
             storage = new TiStorage(client, this);
             database = new TiDatabase(client, this);
-            Log.i(LCAT, "connected: " + client.getEndPoint());
-            fireEvent("connected", new KrollDict());
         }
     }
 
     private void subscribeChannels(Object[] data) {
-        if (!checkConnection()) return;
+        if (!checkConfiguration()) return;
         Realtime realtime = new Realtime(client);
         String[] channels = new String[data.length];
         System.arraycopy(data, 0, channels, 0, data.length);
@@ -87,8 +88,36 @@ public class TiAppwriteModule extends KrollModule {
     }
 
     @Kroll.method
+    public void checkConnection() {
+        KrollDict kd = new KrollDict();
+        kd.put("action", "connection");
+        Thread thread = new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                try {
+                    URL myUrl = new URL(client.getEndPoint().replace("/v1", "/"));
+                    HttpURLConnection connection = (HttpURLConnection) myUrl.openConnection();
+                    if (connection.getResponseCode() == 200) {
+                        kd.put("status", true);
+                    } else {
+                        kd.put("status", false);
+                    }
+                    fireEvent("connection", kd);
+                } catch (Exception e) {
+                    Log.i("error", e.getMessage() + " " + e.toString());
+                    kd.put("status", false);
+                    fireEvent("connection", kd);
+                }
+            }
+        });
+
+        thread.start();
+    }
+
+    @Kroll.method
     public void subscribe(Object map) {
-        if (!checkConnection()) return;
+        if (!checkConfiguration()) return;
         if (map != null) {
             subscribeChannels((Object[]) map);
         }
@@ -96,7 +125,7 @@ public class TiAppwriteModule extends KrollModule {
 
     @Kroll.method
     public void listFiles() {
-        if (!checkConnection()) return;
+        if (!checkConfiguration()) return;
         if (storage != null) {
             storage.listFiles();
         }
@@ -104,7 +133,7 @@ public class TiAppwriteModule extends KrollModule {
 
     @Kroll.method
     public void getFile(String fileId) {
-        if (!checkConnection()) return;
+        if (!checkConfiguration()) return;
         if (storage != null && fileId != "") {
             storage.getFile(fileId);
         }
@@ -112,7 +141,7 @@ public class TiAppwriteModule extends KrollModule {
 
     @Kroll.method
     public void downloadFile(String fileId) {
-        if (!checkConnection()) return;
+        if (!checkConfiguration()) return;
         if (storage != null && fileId != "") {
             storage.downloadFile(fileId);
         }
@@ -120,14 +149,15 @@ public class TiAppwriteModule extends KrollModule {
 
     @Kroll.method
     public void deleteFile(String fileId) {
-        if (!checkConnection()) return;
+        if (!checkConfiguration()) return;
         if (storage != null && fileId != "") {
             storage.deleteFile(fileId);
         }
     }
+
     @Kroll.method
     public void getPreview(HashMap data) {
-        if (!checkConnection()) return;
+        if (!checkConfiguration()) return;
         if (storage != null) {
             storage.getPreview(data);
         }
@@ -135,7 +165,7 @@ public class TiAppwriteModule extends KrollModule {
 
     @Kroll.method
     public void unsubscribe(Object _input) {
-        if (!checkConnection()) return;
+        if (!checkConfiguration()) return;
         Object[] data = (Object[]) _input;
         Realtime realtime = new Realtime(client);
         String[] channels = new String[data.length];
@@ -149,7 +179,7 @@ public class TiAppwriteModule extends KrollModule {
 
     @Kroll.method
     public void getDocuments(String collectionId) {
-        if (!checkConnection()) return;
+        if (!checkConfiguration()) return;
         if (collectionId != "") {
             database.getDocuments(collectionId);
         }
@@ -157,7 +187,7 @@ public class TiAppwriteModule extends KrollModule {
 
     @Kroll.method
     public void getDocument(String collectionId, String documentId) {
-        if (!checkConnection()) return;
+        if (!checkConfiguration()) return;
         if (collectionId != "" && documentId != "") {
             database.getDocument(collectionId, documentId);
         }
@@ -165,15 +195,15 @@ public class TiAppwriteModule extends KrollModule {
 
     @Kroll.method
     public void createDocument(String collectionId, HashMap data) {
-        if (!checkConnection()) return;
-        if (collectionId != "" ) {
+        if (!checkConfiguration()) return;
+        if (collectionId != "") {
             database.createDocument(collectionId, data);
         }
     }
 
     @Kroll.method
     public void deleteDocument(String collectionId, String documentId) {
-        if (!checkConnection()) return;
+        if (!checkConfiguration()) return;
         if (collectionId != "" && documentId != "") {
             database.deleteDocument(collectionId, documentId);
         }
@@ -181,50 +211,49 @@ public class TiAppwriteModule extends KrollModule {
 
     @Kroll.method
     public void createSession(HashMap map) {
-        if (!checkConnection()) return;
+        if (!checkConfiguration()) return;
         account.createSession(map);
     }
 
     @Kroll.method
     public void deleteSession(String sessionId) {
-        if (!checkConnection()) return;
+        if (!checkConfiguration()) return;
         account.deleteSession(sessionId);
     }
 
     @Kroll.method
     public void verifyMail(String url) {
-        if (!checkConnection()) return;
+        if (!checkConfiguration()) return;
         account.verifyMail(url);
     }
 
     @Kroll.method
     public void getAccount() {
-        if (!checkConnection()) return;
+        if (!checkConfiguration()) return;
         account.getAccount();
     }
 
     @Kroll.method
     public void createAccount(HashMap map) {
-        if (!checkConnection()) return;
+        if (!checkConfiguration()) return;
         account.createAccount(map);
     }
 
     @Kroll.method
     public void deleteAccount() {
-        if (!checkConnection()) return;
+        if (!checkConfiguration()) return;
         account.deleteAccount();
     }
 
     @Kroll.method
     public void createFile(HashMap map) {
-        if (!checkConnection()) return;
+        if (!checkConfiguration()) return;
         Object obj = map.get("file");
         String[] _read = TiConvert.toStringArray((Object[]) map.get("read"));
         String[] _write = TiConvert.toStringArray((Object[]) map.get("write"));
         if (storage == null) return;
         if (obj instanceof TiFileProxy) {
             TiBaseFile file = ((TiFileProxy) obj).getBaseFile();
-            //Log.i(LCAT, "File: " + file.nativePath() + " " + file.exists());
             try {
                 storage.createFile(file.getNativeFile(), _read, _write);
             } catch (Exception e) {
@@ -277,8 +306,8 @@ public class TiAppwriteModule extends KrollModule {
     }
 
 
-    public boolean checkConnection() {
-        if (isConnected == false) {
+    public boolean checkConfiguration() {
+        if (isConfigured == false) {
             KrollDict kd = new KrollDict();
             kd.put("action", "connection");
             kd.put("message", "no active connection");

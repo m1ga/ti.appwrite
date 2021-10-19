@@ -9,7 +9,8 @@ var USER_MAIL = "mail@mail.com";
 var USER_PASSWORD = "1234password";
 
 var btns = [
-	["connect", onClickConnect],
+	["create", onClickConnect],
+	["check connection", onClickCheck],
 	["-"],
 	["create account", onClickCreate],
 	["verify mail", onClickVerify],
@@ -78,7 +79,7 @@ _.each(btns, function(btn) {
 	}
 });
 scrollView.add(btnArray);
-btnArray[0].backgroundColor = "#f44";
+btnArray[1].backgroundColor = "#f44";
 
 appwrite.addEventListener("realtimeEvent", function(e) {
 	console.log("event: " + e.action);
@@ -106,7 +107,6 @@ appwrite.addEventListener("database", function(e) {
 	}
 	console.log("");
 });
-
 appwrite.addEventListener("storage", function(e) {
 	console.log("---storage---");
 	if (e.blob) {
@@ -142,9 +142,13 @@ appwrite.addEventListener("account", function(e) {
 		console.log(sessionId);
 	}
 });
-
-appwrite.addEventListener("connected", function(e) {
-	btnArray[0].backgroundColor = "#4f4";
+appwrite.addEventListener("connection", function(e) {
+	if (e.status == true) {
+		btnArray[1].backgroundColor = "#4f4";
+	} else {
+		btnArray[1].backgroundColor = "#f44";
+		log.value += "server not available\n";
+	}
 });
 
 function onClickSub(e) {
@@ -184,6 +188,11 @@ function onClickConnect(e) {
 	// appwrite.endpoint = SERVER_URL;
 	// appwrite.project = PROJECT_ID;
 	// appwrite.selfSigned = true;
+}
+
+function onClickCheck(e) {
+	btnArray[1].backgroundColor = "#999";
+	appwrite.checkConnection();
 }
 
 function onClickGetDocuments(e) {
@@ -247,17 +256,6 @@ function onClickGetFile(e) {
 	}
 }
 
-function onClickGetPreview(e) {
-	if (fileId != "") {
-		appwrite.getPreview({
-			id: fileId,
-			width: 10,
-			height: 10,
-			quality: 50,
-		});
-	}
-}
-
 function onClickDownloadFile(e) {
 	if (fileId != "") {
 		appwrite.downloadFile(fileId);
@@ -273,6 +271,17 @@ function onClickDeleteFile(e) {
 function onClickDeleteSession(e) {
 	if (sessionId != "") {
 		appwrite.deleteSession(sessionId);
+	}
+}
+
+function onClickGetPreview(e) {
+	if (fileId != "") {
+		appwrite.getPreview({
+			id: fileId,
+			width: 10,
+			height: 10,
+			quality: 50,
+		});
 	}
 }
 
