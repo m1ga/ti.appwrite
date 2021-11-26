@@ -43,7 +43,8 @@ appwrite.create({
 	channels: ["files", "account"]
 });
 ```
-Full example: [app.js](example/app.js)
+Full example: [app.js](example/app.js)<br/>
+Full tutorial at: [from zero to app: Appwrite + Appcelerator Titanium: A step by step guide](https://github.com/m1ga/from_zero_to_app/blob/master/appwrite_app.md)
 
 ## Methods
 
