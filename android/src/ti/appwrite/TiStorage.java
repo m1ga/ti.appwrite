@@ -39,7 +39,7 @@ public class TiStorage {
     public void createFile(File file, String[] _read, String[] _write) {
         String _action = "createFile";
         try {
-            storage.createFile(file, Arrays.asList(_read.clone()), Arrays.asList(_write.clone()), new Continuation<Response>() {
+            storage.createFile("unique()", file, Arrays.asList(_read.clone()), Arrays.asList(_write.clone()), new Continuation<Object>() {
                 @NonNull
                 @Override
                 public CoroutineContext getContext() {
@@ -74,7 +74,7 @@ public class TiStorage {
     public void listFiles() {
         String _action = "listFiles";
         try {
-            storage.listFiles(new Continuation<Response>() {
+            storage.listFiles(new Continuation<Object>() {
                 @NonNull
                 @Override
                 public CoroutineContext getContext() {
@@ -118,7 +118,7 @@ public class TiStorage {
     public void getFile(String fileId) {
         String _action = "getFile";
         try {
-            storage.getFile(fileId, new Continuation<Response>() {
+            storage.getFile(fileId, new Continuation<Object>() {
                 @NonNull
                 @Override
                 public CoroutineContext getContext() {
@@ -154,7 +154,7 @@ public class TiStorage {
     public void deleteFile(String fileId) {
         String _action = "deleteFile";
         try {
-            storage.deleteFile(fileId, new Continuation<Response>() {
+            storage.deleteFile(fileId, new Continuation<Object>() {
                 @NonNull
                 @Override
                 public CoroutineContext getContext() {
@@ -188,7 +188,7 @@ public class TiStorage {
     public void downloadFile(String fileId) {
         String _action = "downloadFile";
         try {
-            storage.getFileDownload(fileId, new Continuation<Response>() {
+            storage.getFileDownload(fileId, new Continuation<Object>() {
                 @NonNull
                 @Override
                 public CoroutineContext getContext() {
@@ -224,13 +224,13 @@ public class TiStorage {
     public void getPreview(HashMap data) {
         String _action = "previewFile";
         String fileId = TiConvert.toString(data.get("id"), "");
-        int width = TiConvert.toInt(data.get("width"), -1);
-        int height = TiConvert.toInt(data.get("height"), -1);
-        int quality = TiConvert.toInt(data.get("quality"), 100);
+        long width = TiConvert.toInt(data.get("width"), -1);
+        long height = TiConvert.toInt(data.get("height"), -1);
+        long quality = TiConvert.toInt(data.get("quality"), 100);
 
         if (fileId != "") {
             try {
-                storage.getFilePreview(fileId, width == -1 ? null : width, height == -1 ? null : height, null, quality, new Continuation<Response>() {
+                storage.getFilePreview(fileId, width == -1 ? null : width, height == -1 ? null : height, null, quality, new Continuation<Object>() {
                     @NonNull
                     @Override
                     public CoroutineContext getContext() {

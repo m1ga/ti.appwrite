@@ -38,7 +38,7 @@ public class TiDatabase {
             Database database = new Database(client);
             try {
                 JSONObject jsonArray = new JSONObject(objectData);
-                database.createDocument(collectionId, objectData, new Continuation<Object>() {
+                database.createDocument(collectionId, "unique()", objectData, new Continuation<Object>() {
                     @NotNull
                     @Override
                     public CoroutineContext getContext() {

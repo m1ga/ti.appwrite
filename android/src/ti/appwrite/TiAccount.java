@@ -43,7 +43,7 @@ public class TiAccount {
         }
 
         try {
-            account.create(email, password, new Continuation<Response>() {
+            account.create("unique()", email, password, new Continuation<Object>() {
                 @NonNull
                 @Override
                 public CoroutineContext getContext() {
@@ -243,7 +243,7 @@ public class TiAccount {
         }
         String _action = "deleteAccount";
         try {
-            account.delete(new Continuation<Response>() {
+            account.delete(new Continuation<Object>() {
                 @NonNull
                 @Override
                 public CoroutineContext getContext() {

@@ -1,4 +1,4 @@
 
 dependencies {
-	implementation("io.appwrite:sdk-for-android:0.2.1")
+	implementation("io.appwrite:sdk-for-android:0.3.3")
 }
