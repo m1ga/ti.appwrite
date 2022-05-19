@@ -81,7 +81,7 @@ public class TiAppwriteModule extends KrollModule {
 
         realtime.subscribe(channels, response -> {
             KrollDict kd = new KrollDict();
-            kd.put("action", response.getEvent());
+            kd.put("action", response.getEvents());
             fireEvent("realtimeEvent", kd);
             return null;
         });
@@ -124,34 +124,34 @@ public class TiAppwriteModule extends KrollModule {
     }
 
     @Kroll.method
-    public void listFiles() {
+    public void listFiles(String bucketId) {
         if (!checkConfiguration()) return;
         if (storage != null) {
-            storage.listFiles();
+            storage.listFiles(bucketId);
         }
     }
 
     @Kroll.method
-    public void getFile(String fileId) {
+    public void getFile(String bucketId, String fileId) {
         if (!checkConfiguration()) return;
         if (storage != null && fileId != "") {
-            storage.getFile(fileId);
+            storage.getFile(bucketId, fileId);
         }
     }
 
     @Kroll.method
-    public void downloadFile(String fileId) {
+    public void downloadFile(String bucketId, String fileId) {
         if (!checkConfiguration()) return;
         if (storage != null && fileId != "") {
-            storage.downloadFile(fileId);
+            storage.downloadFile(bucketId, fileId);
         }
     }
 
     @Kroll.method
-    public void deleteFile(String fileId) {
+    public void deleteFile(String bucketId, String fileId) {
         if (!checkConfiguration()) return;
         if (storage != null && fileId != "") {
-            storage.deleteFile(fileId);
+            storage.deleteFile(bucketId, fileId);
         }
     }
 
@@ -238,6 +238,7 @@ public class TiAppwriteModule extends KrollModule {
         if (!checkConfiguration()) return;
         account.createAccount(map);
     }
+
 
     @Kroll.method
     public void deleteAccount() {

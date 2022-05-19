@@ -243,7 +243,7 @@ public class TiAccount {
         }
         String _action = "deleteAccount";
         try {
-            account.delete(new Continuation<Object>() {
+            account.updateStatus(new Continuation<Object>() {
                 @NonNull
                 @Override
                 public CoroutineContext getContext() {
