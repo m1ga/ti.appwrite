@@ -1,8 +1,8 @@
-# Appcelerator Titanium module for Appwrite
+# Titanium module for Appwrite
 
 <img src="images/screenshot.png" alt="screenshot"/>
 
-Appcelerator Titanium Android module using [Appwrite's Android SDK](https://github.com/appwrite/sdk-for-android)
+Titanium Android module using [Appwrite's Android SDK](https://github.com/appwrite/sdk-for-android)
 
 ## What is Appwrite:
 
@@ -44,7 +44,7 @@ appwrite.create({
 });
 ```
 Full example: [app.js](example/app.js)<br/>
-Full tutorial at: [from zero to app: Appwrite + Appcelerator Titanium: A step by step guide](https://github.com/m1ga/from_zero_to_app/blob/master/appwrite_app.md)
+Full tutorial at: [from zero to app: Appwrite + Titanium: A step by step guide](https://fromzerotoapp.com/appwrite-appcelerator-titanium-a-step-by-step-guide/)
 
 ## Methods
 
